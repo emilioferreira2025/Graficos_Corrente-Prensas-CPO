@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+
+  <!-- SDK oficial do Custom Widget TagoIO -->
+  <script src="https://admin.tago.io/dist/custom-widget.min.js"></script>
+
+  <!-- Apache ECharts -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #ffffff;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    #chart {
+      width: 100%;
+      height: 400px;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="chart"></div>
+
+  <script>
+    let chart;
+
+    function renderChart(labels, values) {
+      if (!chart) {
+        chart = echarts.init(document.getElementById("chart"));
+      }
+
+      chart.setOption({
+        tooltip: {
+          trigger: "axis"
+        },
+
+        legend: {
+          show: false
+        },
+
+        grid: {
+          left: "8%",
+          right: "5%",
+          top: "10%",
+          bottom: "10%"
+        },
+
+        xAxis: {
+          type: "category",
+          data: labels,
+          axisLabel: {
+            show: false        // ❌ REMOVE DATAS DO EIXO X
+          },
+          axisTick: {
+            show: false
+          },
+          axisLine: {
+            show: false
+          }
+        },
+
+        yAxis: {
+          type: "value",
+          name: "Corrente (A)",
+          axisLabel: {
+            formatter: "{value} A"
+          }
+        },
+
+        series: [{
+          type: "line",
+          smooth: true,
+
+          symbol: "circle",
+          symbolSize: 6,
+          showAllSymbol: false,
+
+          lineStyle: {
+            width: 2,
+            color: "#ff0000"   // 🔴 LINHA VERMELHA
+          },
+
+          itemStyle: {
+            color: "#ff0000",  // 🔴 PONTOS VERMELHOS
+            borderColor: "#ff0000"
+          },
+
+          emphasis: {
+            focus: "series",
+            scale: true,
+            itemStyle: {
+              color: "#ff0000"
+            }
+          },
+
+          data: values
+        }]
+      });
+    }
+
+    function applyData(dataArray) {
+      const data = dataArray
+        .filter(d => d.variable === "current_ipp1")
+        .sort((a, b) => new Date(a.time) - new Date(b.time));
+
+      if (!data.length) return;
+
+      const labels = data.map(d =>
+        new Date(d.time).toLocaleString("pt-BR")
+      );
+
+      const values = data.map(d => d.value);
+
+      renderChart(labels, values);
+    }
+
+    // Carga inicial
+    window.TagoIO.onStart(widget => {
+      applyData(widget.data);
+    });
+
+    // Atualização em tempo real
+    window.TagoIO.onRealtime(buckets => {
+      let allData = [];
+
+      buckets.forEach(bucket => {
+        if (bucket.result) {
+          allData = allData.concat(bucket.result);
+        }
+      });
+
+      applyData(allData);
+    });
+
+    window.TagoIO.ready();
+  </script>
+</body>
+</html>
