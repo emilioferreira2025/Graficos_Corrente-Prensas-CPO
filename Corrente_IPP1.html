@@ -58,21 +58,23 @@
             formatter: "{value} A"
           }
         },
-        series: [
-          {
-            name: "Current IPP1",
-            type: "line",
-            smooth: true,
-            symbol: "circle",
-            symbolSize: 6,
-            lineStyle: {
-              width: 2
-            },
-            data: values
-          }
-        ]
-      });
-    }
+       series: [
+  {
+    name: "Current IPP1",
+    type: "line",
+    smooth: true,
+    symbol: "circle",
+    symbolSize: 6,
+    lineStyle: {
+      width: 2,
+      color: "#ff0000"   // 🔴 linha vermelha
+    },
+    itemStyle: {
+      color: "#ff0000"   // 🔴 cor dos pontos
+    },
+    data: values
+  }
+]
 
     function applyData(dataArray) {
       const data = dataArray
@@ -112,3 +114,4 @@
   </script>
 </body>
 </html>
+
